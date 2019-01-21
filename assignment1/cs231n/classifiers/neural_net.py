@@ -75,7 +75,10 @@ class TwoLayerNet(object):
     # Store the result in the scores variable, which should be an array of      #
     # shape (N, C).                                                             #
     #############################################################################
-    pass
+    h1 = X.dot(W1) + b1
+    a1 = np.maximum(h1, 0)
+    h2 = a1.dot(W2) + b2
+    scores = h2
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -92,7 +95,11 @@ class TwoLayerNet(object):
     # in the variable loss, which should be a scalar. Use the Softmax           #
     # classifier loss.                                                          #
     #############################################################################
-    pass
+    h2 -= np.max(h2, axis = 1).reshape(-1, 1)
+    a2 = np.exp(h2)
+    a2 /= np.sum(a2, axis = 1).reshape(-1, 1)
+
+    loss = np.sum(-np.log(a2[range(N), y])) / N + reg * (np.sum(W1*W1) + np.sum(W2*W2))
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -104,7 +111,22 @@ class TwoLayerNet(object):
     # and biases. Store the results in the grads dictionary. For example,       #
     # grads['W1'] should store the gradient on W1, and be a matrix of same size #
     #############################################################################
-    pass
+    dh2 = a2
+    dh2[range(N), y] -= 1
+    dh2 /= N
+    dw2 = a1.T.dot(dh2) + 2*reg*W2
+    db2 = np.sum(dh2, axis = 0)
+
+    da1 = dh2.dot(W2.T)
+    dh1 = (a1 > 0) * da1
+
+    dw1 = X.T.dot(dh1) + 2*reg*W1
+    db1 = np.sum(dh1, axis = 0)
+    
+    grads['W1'] = dw1
+    grads['b1'] = db1
+    grads['W2'] = dw2
+    grads['b2'] = db2
     #############################################################################
     #                              END OF YOUR CODE                             #
     #############################################################################
@@ -148,7 +170,9 @@ class TwoLayerNet(object):
       # TODO: Create a random minibatch of training data and labels, storing  #
       # them in X_batch and y_batch respectively.                             #
       #########################################################################
-      pass
+      batch_idx = np.random.choice(num_train, batch_size, replace = True)
+      X_batch = X[batch_idx, :]
+      y_batch = y[batch_idx]
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -163,7 +187,10 @@ class TwoLayerNet(object):
       # using stochastic gradient descent. You'll need to use the gradients   #
       # stored in the grads dictionary defined above.                         #
       #########################################################################
-      pass
+      self.params['W1'] -= learning_rate * grads['W1']
+      self.params['W2'] -= learning_rate * grads['W2']
+      self.params['b1'] -= learning_rate * grads['b1']
+      self.params['b2'] -= learning_rate * grads['b2']
       #########################################################################
       #                             END OF YOUR CODE                          #
       #########################################################################
@@ -208,7 +235,7 @@ class TwoLayerNet(object):
     ###########################################################################
     # TODO: Implement this function; it should be VERY simple!                #
     ###########################################################################
-    pass
+    y_pred = np.argmax(self.loss(X), axis = 1)
     ###########################################################################
     #                              END OF YOUR CODE                           #
     ###########################################################################
