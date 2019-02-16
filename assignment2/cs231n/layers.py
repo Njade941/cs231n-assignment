@@ -532,7 +532,8 @@ def conv_forward_naive(x, w, b, conv_param):
     # TODO: Implement the convolutional forward pass.                         #
     # Hint: you can use the function np.pad for padding.                      #
     ###########################################################################
-    pass
+    
+    print(np.pad(x, ((0, 0), (0, 0), (1, 1), (1, 1),), 'constant', constant_values=0).shape)
     ###########################################################################
     #                             END OF YOUR CODE                            #
     ###########################################################################
